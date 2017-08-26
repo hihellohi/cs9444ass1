@@ -19,6 +19,14 @@ you create.
 
 import tensorflow as tf
 
+def weight_variable(shape):
+  initial = tf.truncated_normal(shape, stddev=0.1)
+  return tf.Variable(initial)
+
+def bias_variable(shape):
+  initial = tf.constant(0.1, shape=shape)
+  return tf.Variable(initial)
+
 def input_placeholder():
     """
     This placeholder serves as the input to the model, and will be populated
@@ -68,8 +76,8 @@ def onelayer(X, Y, layersize=10):
         batch_loss: The average cross-entropy loss of the batch
     """
 
-    w = tf.Variable(tf.zeros([784,10]));
-    b = tf.Variable(tf.zeros([10]));
+    w = tf.Variable(tf.zeros([784,layersize]));
+    b = tf.Variable(tf.zeros([layersize]));
     logits = tf.matmul(X, w) + b;
     preds = tf.nn.softmax(logits);
     batch_xentropy = -tf.reduce_sum(Y * tf.log(preds), 1);
@@ -94,6 +102,18 @@ def twolayer(X, Y, hiddensize=30, outputsize=10):
         batch_xentropy: The cross-entropy loss for each image in the batch
         batch_loss: The average cross-entropy loss of the batch
     """
+
+    w1 = weight_variable([784, hiddensize]);
+    b1 = bias_variable([hiddensize]);
+    
+    w2 = weight_variable([hiddensize, outputsize]);
+    b2 = bias_variable([outputsize]);
+
+    logits = tf.matmul(tf.nn.relu(tf.matmul(X, w1) + b1), w2) + b2;
+    preds = tf.nn.softmax(logits);
+    batch_xentropy = -tf.reduce_sum(Y * tf.log(preds), 1);
+    batch_loss = tf.reduce_mean(batch_xentropy);
+
     return w1, b1, w2, b2, logits, preds, batch_xentropy, batch_loss
 
 def convnet(X, Y, convlayer_sizes=[10, 10], \
