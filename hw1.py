@@ -76,11 +76,11 @@ def onelayer(X, Y, layersize=10):
         batch_loss: The average cross-entropy loss of the batch
     """
 
-    w = tf.Variable(tf.zeros([784,layersize]));
-    b = tf.Variable(tf.zeros([layersize]));
+    w = weight_variable([784, layersize]);
+    b = bias_variable([layersize]);
     logits = tf.matmul(X, w) + b;
     preds = tf.nn.softmax(logits);
-    batch_xentropy = -tf.reduce_sum(Y * tf.log(preds), 1);
+    batch_xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=preds);
     batch_loss = tf.reduce_mean(batch_xentropy);
 
     return w, b, logits, preds, batch_xentropy, batch_loss
@@ -111,7 +111,7 @@ def twolayer(X, Y, hiddensize=30, outputsize=10):
 
     logits = tf.matmul(tf.nn.relu(tf.matmul(X, w1) + b1), w2) + b2;
     preds = tf.nn.softmax(logits);
-    batch_xentropy = -tf.reduce_sum(Y * tf.log(preds), 1);
+    batch_xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=preds);
     batch_loss = tf.reduce_mean(batch_xentropy);
 
     return w1, b1, w2, b2, logits, preds, batch_xentropy, batch_loss
@@ -142,6 +142,21 @@ def convnet(X, Y, convlayer_sizes=[10, 10], \
     will be from the conv2 layer. If you reshape the conv2 output using tf.reshape,
     you should be able to call onelayer() to get the final layer of your network
     """
+
+    x = tf.reshape(X, [-1, 28, 28, 1]);
+    conv1 = tf.layers.conv2d(x, 16, filter_shape, padding="SAME", activation=tf.nn.relu);
+    conv2 = tf.layers.conv2d(conv1, 32, filter_shape, padding="SAME", activation=tf.nn.relu);
+
+    #w, b, logits, preds, batch_xentropy, batch_loss = onelayer(tf.reshape(conv2, [-1, 784]), Y);
+
+    w = weight_variable([784 * 32, outputsize]);
+    b = bias_variable([outputsize]);
+
+    logits = tf.matmul(tf.reshape(conv2, [-1, 784 * 32]), w) + b;
+    preds = tf.nn.softmax(logits);
+    batch_xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=preds);
+    batch_loss = tf.reduce_mean(batch_xentropy);
+
     return conv1, conv2, w, b, logits, preds, batch_xentropy, batch_loss
 
 def train_step(sess, batch, X, Y, train_op, loss_op, summaries_op):

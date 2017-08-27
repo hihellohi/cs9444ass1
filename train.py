@@ -102,6 +102,8 @@ def get_accuracy_op(preds_op, Y):
 
 
 if __name__ == "__main__":
+    print("hello");
+
     # hyperparameters
     learning_rate = 0.001
     batch_size = 128
