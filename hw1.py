@@ -144,15 +144,13 @@ def convnet(X, Y, convlayer_sizes=[10, 10], \
     """
 
     x = tf.reshape(X, [-1, 28, 28, 1]);
-    conv1 = tf.layers.conv2d(x, 16, filter_shape, padding="SAME", activation=tf.nn.relu);
-    conv2 = tf.layers.conv2d(conv1, 32, filter_shape, padding="SAME", activation=tf.nn.relu);
+    conv1 = tf.layers.conv2d(x, convlayer_sizes[0], filter_shape, padding=padding, activation=tf.nn.relu);
+    conv2 = tf.layers.conv2d(conv1, convlayer_sizes[1], filter_shape, padding=padding, activation=tf.nn.relu);
 
-    #w, b, logits, preds, batch_xentropy, batch_loss = onelayer(tf.reshape(conv2, [-1, 784]), Y);
-
-    w = weight_variable([784 * 32, outputsize]);
+    w = weight_variable([784 * convlayer_sizes[1], outputsize]);
     b = bias_variable([outputsize]);
 
-    logits = tf.matmul(tf.reshape(conv2, [-1, 784 * 32]), w) + b;
+    logits = tf.matmul(tf.reshape(conv2, [-1, 784 * convlayer_sizes[1]]), w) + b;
     preds = tf.nn.softmax(logits);
     batch_xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=preds);
     batch_loss = tf.reduce_mean(batch_xentropy);
