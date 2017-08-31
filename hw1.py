@@ -143,8 +143,7 @@ def convnet(X, Y, convlayer_sizes=[10, 10], \
     you should be able to call onelayer() to get the final layer of your network
     """
 
-    x = tf.reshape(X, [-1, 28, 28, 1]);
-    conv1 = tf.layers.conv2d(x, convlayer_sizes[0], filter_shape, padding=padding, activation=tf.nn.relu);
+    conv1 = tf.layers.conv2d(X, convlayer_sizes[0], filter_shape, padding=padding, activation=tf.nn.relu);
     conv2 = tf.layers.conv2d(conv1, convlayer_sizes[1], filter_shape, padding=padding, activation=tf.nn.relu);
 
     w = weight_variable([784 * convlayer_sizes[1], outputsize]);
